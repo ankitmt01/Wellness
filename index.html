@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wellness">
+<meta name="theme-color" content="#0a0d14">
+<title>Wellness OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080b12;--bg2:#0d1220;--bg3:#111827;
+  --s1:#161d2e;--s2:#1c2440;--s3:#222c4a;
+  --br:#1e2a42;--br2:#263552;--br3:#2e3f62;
+  --gold:#e8b84b;--gold2:#f5d080;--gold3:#c49430;
+  --em:#4ade80;--em2:#86efac;
+  --blue:#60a5fa;--blue2:#93c5fd;
+  --violet:#a78bfa;--violet2:#c4b5fd;
+  --rose:#fb7185;--rose2:#fda4af;
+  --orange:#fb923c;--orange2:#fdba74;
+  --teal:#2dd4bf;--teal2:#5eead4;
+  --cyan:#22d3ee;--cyan2:#67e8f9;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;--text4:#1e293b;
+  --card:rgba(22,29,46,0.8);
+  --glow-gold:rgba(232,184,75,0.15);
+  --glow-green:rgba(74,222,128,0.12);
+  --glow-blue:rgba(96,165,250,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+body{display:flex;flex-direction:column}
+
+/* ─── ANIMATED BG ─── */
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.12;animation:orbFloat linear infinite}
+.orb1{width:400px;height:400px;background:var(--gold);top:-100px;left:-100px;animation-duration:25s}
+.orb2{width:350px;height:350px;background:var(--violet);top:30%;right:-100px;animation-duration:30s;animation-delay:-10s}
+.orb3{width:300px;height:300px;background:var(--teal);bottom:-50px;left:20%;animation-duration:20s;animation-delay:-5s}
+@keyframes orbFloat{0%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-20px) scale(1.05)}50%{transform:translate(-20px,30px) scale(0.95)}75%{transform:translate(20px,20px) scale(1.02)}100%{transform:translate(0,0) scale(1)}}
+
+/* ─── INSTALL BANNER ─── */
+.install-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:500;background:linear-gradient(135deg,var(--gold3),var(--gold));padding:12px 16px;align-items:center;gap:10px}
+.install-banner.show{display:flex}
+.install-banner p{flex:1;font-size:12px;font-weight:600;color:#0a0d14;line-height:1.3}
+.install-banner button{padding:6px 14px;border-radius:20px;border:2px solid #0a0d14;background:transparent;font-size:11px;font-weight:800;color:#0a0d14;cursor:pointer;white-space:nowrap}
+
+/* ─── STATUS BAR ─── */
+.statusbar{background:rgba(8,11,18,0.95);backdrop-filter:blur(20px);padding:env(safe-area-inset-top) 16px 0;flex-shrink:0;z-index:100;border-bottom:1px solid var(--br)}
+.statusbar-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px}
+.app-brand{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold2);letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}
+.app-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--em);box-shadow:0 0 12px var(--em);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.clock{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold);letter-spacing:0.05em}
+.fast-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.06em;border:1px solid;margin-top:6px;margin-bottom:2px}
+.fast-pill.fasting{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.3);color:var(--orange2)}
+.fast-pill.eating{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.3);color:var(--em2)}
+.fast-pill .timer{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px}
+
+/* ─── MAIN SCROLL AREA ─── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;position:relative;z-index:1;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.main::-webkit-scrollbar{width:3px}
+.main::-webkit-scrollbar-thumb{background:var(--br3);border-radius:2px}
+
+/* ─── PAGES ─── */
+.page{display:none;min-height:100%;padding:16px}
+.page.active{display:block;animation:pageIn 0.25s ease}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── CARDS ─── */
+.card{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(20px)}
+.card-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0}
+.card-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;line-height:1.1}
+.card-sub{font-size:11px;color:var(--text3);margin-bottom:14px}
+
+/* ─── TODAY HERO ─── */
+.today-hero{padding:24px;background:linear-gradient(135deg,rgba(232,184,75,0.08),rgba(167,139,250,0.05));border:1px solid rgba(232,184,75,0.2);border-radius:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(232,184,75,0.15),transparent 70%);pointer-events:none}
+.greeting-time{font-size:11px;font-weight:600;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.greeting{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.15;margin-bottom:4px}
+.greeting em{color:var(--gold2);font-style:italic}
+.quote-text{font-size:12px;color:var(--text2);font-style:italic;line-height:1.5;margin-top:8px;padding-top:10px;border-top:1px solid var(--br)}
+
+/* ─── STATS ROW ─── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stat-box{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:12px 8px;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.stat-box:hover{border-color:var(--br3);transform:scale(1.02)}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;line-height:1;margin-bottom:3px}
+.stat-lbl{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
+.stat-bar{height:2px;border-radius:1px;margin-top:6px;background:var(--br)}
+.stat-fill{height:100%;border-radius:1px;transition:width 0.5s ease}
+
+/* ─── NEXT TASK ─── */
+.next-card{background:linear-gradient(135deg,rgba(232,184,75,0.06),rgba(232,184,75,0.02));border:1px solid rgba(232,184,75,0.25);border-radius:18px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.next-icon{width:48px;height:48px;border-radius:14px;background:rgba(232,184,75,0.12);border:1px solid rgba(232,184,75,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.next-label{font-size:9px;color:var(--gold3);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px}
+.next-name{font-size:15px;font-weight:700;color:var(--gold2);margin-bottom:2px;line-height:1.2}
+.next-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+.next-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;background:rgba(232,184,75,0.1);border:1px solid rgba(232,184,75,0.2);border-radius:20px;color:var(--gold);white-space:nowrap;flex-shrink:0}
+
+/* ─── SCHEDULE ITEMS ─── */
+.sched-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--s1);border:1px solid var(--br);border-radius:14px;margin-bottom:6px;cursor:pointer;transition:all 0.2s;position:relative}
+.sched-item:hover{border-color:var(--br3);background:var(--s2)}
+.sched-item.done-s{opacity:0.45}
+.sched-item.done-s .sched-title{text-decoration:line-through;color:var(--text3)}
+.sched-item.current{border-color:var(--gold);background:rgba(232,184,75,0.05);box-shadow:0 0 20px rgba(232,184,75,0.08)}
+.sched-item.current::before{content:'NOW';position:absolute;right:10px;top:10px;font-size:8px;font-weight:800;letter-spacing:0.15em;color:var(--gold);background:rgba(232,184,75,0.15);padding:2px 6px;border-radius:4px}
+.sched-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);background:rgba(232,184,75,0.08);padding:3px 8px;border-radius:6px;flex-shrink:0;white-space:nowrap;margin-top:2px;border:1px solid rgba(232,184,75,0.15)}
+.sched-body{flex:1;min-width:0}
+.sched-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.sched-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5}
+.sched-cat{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-top:4px}
+.sched-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--br3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:transparent;font-size:10px;font-weight:800;margin-top:2px}
+.sched-item.done-s .sched-check{background:var(--em);border-color:var(--em);color:#0a0d14}
+
+/* ─── WATER ─── */
+.water-main{padding:20px;background:linear-gradient(135deg,rgba(34,211,238,0.06),rgba(45,212,191,0.04));border:1px solid rgba(34,211,238,0.15);border-radius:20px;margin-bottom:14px}
+.water-ring{width:140px;height:140px;margin:0 auto 16px;position:relative}
+.water-ring svg{transform:rotate(-90deg)}
+.water-ring-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;color:var(--cyan2);line-height:1}
+.ring-sub{font-size:10px;color:var(--text3)}
+.glass-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.glass-btn{aspect-ratio:1;border-radius:12px;background:var(--s1);border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+.glass-btn.full{background:rgba(34,211,238,0.12);border-color:var(--cyan);box-shadow:0 0 16px rgba(34,211,238,0.15)}
+.glass-btn.full::after{content:'';position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to top,rgba(34,211,238,0.25),transparent)}
+.water-actions{display:flex;gap:8px}
+.btn{flex:1;padding:12px 8px;border-radius:14px;border:1px solid var(--br2);background:var(--s2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s}
+.btn:hover{filter:brightness(1.15)}
+.btn.primary{background:linear-gradient(135deg,var(--cyan),var(--teal));border-color:transparent;color:#0a0d14}
+.btn.danger{background:rgba(251,113,133,0.1);border-color:rgba(251,113,133,0.3);color:var(--rose2)}
+
+/* ─── SUPPLEMENT GRID ─── */
+.supp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.supp-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.25s;text-align:center;position:relative;overflow:hidden}
+.supp-card:hover{border-color:var(--br3)}
+.supp-card.taken{background:rgba(74,222,128,0.06);border-color:rgba(74,222,128,0.3)}
+.supp-card.taken::after{content:'✓';position:absolute;top:8px;right:10px;font-size:12px;font-weight:800;color:var(--em)}
+.supp-em{font-size:28px;margin-bottom:6px}
+.supp-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:3px}
+.supp-benefit{font-size:10px;color:var(--text3);line-height:1.4;margin-bottom:4px}
+.supp-when{font-size:9px;color:var(--gold);font-weight:600;font-family:'JetBrains Mono',monospace}
+.supp-status{font-size:10px;font-weight:700;margin-top:6px}
+.supp-card:not(.taken) .supp-status{color:var(--text3)}
+.supp-card.taken .supp-status{color:var(--em2)}
+
+/* ─── MEAL PLAN ─── */
+.day-scroll{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;margin-bottom:10px}
+.day-scroll::-webkit-scrollbar{display:none}
+.day-chip{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.06em;border:1px solid var(--br);background:var(--s1);color:var(--text3);cursor:pointer;transition:all 0.2s}
+.day-chip.active{background:rgba(232,184,75,0.12);border-color:var(--gold);color:var(--gold2)}
+.meal-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:14px;margin-bottom:8px}
+.meal-time-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);margin-bottom:4px;font-weight:600}
+.meal-heading{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.meal-items{font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-line}
+.meal-note{font-size:10px;color:var(--text3);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid var(--br)}
+
+/* ─── DETOX ─── */
+.detox-card{display:flex;gap:14px;padding:14px;background:var(--s1);border:1px solid var(--br);border-radius:14px;margin-bottom:8px;align-items:flex-start}
+.detox-icon{width:44px;height:44px;border-radius:12px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.detox-name{font-size:13px;font-weight:700;color:var(--em2);margin-bottom:2px}
+.detox-when{font-size:10px;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:5px}
+.detox-recipe{font-size:11px;color:var(--text2);line-height:1.6}
+
+/* ─── EXERCISE ─── */
+.ex-section-label{font-size:10px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--orange2);margin:12px 0 6px;display:flex;align-items:center;gap:8px}
+.ex-section-label::after{content:'';flex:1;height:1px;background:var(--br)}
+.ex-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all 0.2s}
+.ex-item.done-e{opacity:0.4}
+.ex-item:hover{border-color:var(--br3)}
+.ex-emoji{font-size:18px;width:36px;height:36px;background:rgba(251,146,60,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ex-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.ex-detail{font-size:10px;color:var(--text3);margin-top:2px}
+.ex-dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange2);background:rgba(251,146,60,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap}
+
+/* ─── MEDITATION TIMER ─── */
+.med-center{display:flex;flex-direction:column;align-items:center;padding:24px 0 20px}
+.med-ring{width:160px;height:160px;position:relative;cursor:pointer;margin-bottom:20px}
+.med-ring svg{position:absolute;inset:0}
+.med-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.med-time{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:300;color:var(--text);line-height:1}
+.med-status{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:0.1em}
+.med-ring.active{animation:medPulse 4s ease-in-out infinite}
+@keyframes medPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+.med-controls{display:flex;gap:10px;margin-bottom:20px}
+.med-btn{padding:12px 20px;border-radius:50px;border:1px solid var(--br2);background:var(--s2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s}
+.med-btn.go{background:linear-gradient(135deg,var(--em),var(--teal));border-color:transparent;color:#0a0d14;padding:12px 30px}
+.med-sessions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.med-sess-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:14px;cursor:pointer;transition:all 0.2s;text-align:center}
+.med-sess-card.done-m{background:rgba(74,222,128,0.06);border-color:rgba(74,222,128,0.3)}
+.med-sess-name{font-size:12px;font-weight:700;color:var(--text)}
+.med-sess-time{font-size:10px;color:var(--text3);margin-top:2px}
+.med-sess-done{font-size:10px;color:var(--em2);font-weight:700;margin-top:5px}
+
+/* ─── STUDY ─── */
+.study-block{background:var(--s1);border:1px solid var(--br);border-left:3px solid var(--violet);border-radius:14px;padding:14px;margin-bottom:8px}
+.study-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--violet2);margin-bottom:4px}
+.study-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.study-tasks{font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-line}
+.study-tip{font-size:10px;color:var(--text3);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--br)}
+
+/* ─── SLEEP ─── */
+.sleep-item{display:flex;gap:14px;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:12px;margin-bottom:6px}
+.sleep-t{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue2);min-width:54px;flex-shrink:0;margin-top:3px}
+.sleep-act{font-size:13px;font-weight:600;color:var(--text)}
+.sleep-note{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5}
+
+/* ─── GROOMING ─── */
+.groom-section{margin-bottom:16px}
+.groom-label{font-size:10px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--rose2);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.groom-label::after{content:'';flex:1;height:1px;background:var(--br)}
+.groom-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all 0.2s}
+.groom-card:hover{border-color:var(--br3)}
+.groom-card.done-g{opacity:0.4}
+.groom-card.done-g .groom-n{text-decoration:line-through}
+.groom-em{font-size:18px;width:36px;height:36px;background:rgba(251,113,133,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.groom-n{font-size:12px;font-weight:700;color:var(--text)}
+.groom-note{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4}
+.groom-t{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-left:auto;flex-shrink:0;text-align:right}
+
+/* ─── ANTI AGING ─── */
+.antiage-hero{padding:20px;background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(232,184,75,0.05));border:1px solid rgba(167,139,250,0.2);border-radius:20px;margin-bottom:14px}
+.antiage-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--violet2);margin-bottom:8px}
+.antiage-sub{font-size:12px;color:var(--text2);line-height:1.6}
+.antiage-block{background:var(--s1);border:1px solid var(--br);border-left:3px solid var(--violet);border-radius:14px;padding:14px;margin-bottom:8px}
+.antiage-cat{font-size:9px;font-weight:800;letter-spacing:0.15em;color:var(--violet2);text-transform:uppercase;margin-bottom:4px}
+.antiage-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+.antiage-actions{display:flex;flex-direction:column;gap:5px}
+.antiage-action{display:flex;gap:10px;font-size:11px;color:var(--text2);line-height:1.5}
+.antiage-action::before{content:'→';color:var(--violet);flex-shrink:0}
+.timeline-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;margin-top:8px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);color:var(--violet2)}
+
+/* ─── GROWTH ─── */
+.growth-block{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:14px;margin-bottom:8px}
+.growth-cat{font-size:9px;font-weight:800;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+.growth-name{font-size:14px;font-weight:700;color:var(--gold2);margin-bottom:8px}
+.growth-list{display:flex;flex-direction:column;gap:5px}
+.growth-item-row{display:flex;gap:10px;font-size:11px;color:var(--text2);line-height:1.5}
+.growth-item-row::before{content:'✦';color:var(--gold3);flex-shrink:0}
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,18,0.97);border-top:1px solid var(--br);backdrop-filter:blur(30px);display:flex;z-index:100;padding:8px 0 max(8px, env(safe-area-inset-bottom))}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent;transition:all 0.2s;position:relative}
+.nav-icon{font-size:22px;line-height:1;transition:transform 0.2s}
+.nav-label{font-size:9px;font-weight:600;letter-spacing:0.04em;color:var(--text3);transition:color 0.2s}
+.nav-btn.active .nav-label{color:var(--gold2)}
+.nav-btn.active .nav-icon{transform:scale(1.1)}
+.nav-btn.active::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--gold);border-radius:2px 2px 0 0}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);min-width:16px;height:16px;background:var(--rose);border-radius:8px;font-size:9px;font-weight:800;color:white;display:flex;align-items:center;justify-content:center;padding:0 4px;display:none}
+.nav-badge.show{display:flex}
+
+/* ─── NOTIFICATION ─── */
+.notif-container{position:fixed;top:0;left:0;right:0;z-index:600;pointer-events:none;padding:12px}
+.notif{background:rgba(22,29,46,0.97);border:1px solid var(--gold);border-radius:20px;padding:16px;pointer-events:all;transform:translateY(-120%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);backdrop-filter:blur(30px);box-shadow:0 8px 40px rgba(0,0,0,0.7)}
+.notif.show{transform:translateY(0)}
+.notif-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.notif-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);flex-shrink:0}
+.notif-title{font-size:14px;font-weight:700;color:var(--gold2);flex:1}
+.notif-dismiss{font-size:18px;color:var(--text3);cursor:pointer;line-height:1}
+.notif-body{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.notif-actions{display:flex;gap:8px}
+.notif-btn{flex:1;padding:9px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;font-family:'Outfit',sans-serif;transition:all 0.2s}
+.notif-btn.snooze5{color:var(--orange2);border-color:rgba(251,146,60,0.3);background:rgba(251,146,60,0.08)}
+.notif-btn.snooze10{color:var(--violet2);border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.08)}
+.notif-btn.notif-done{color:#0a0d14;border-color:transparent;background:linear-gradient(135deg,var(--em),var(--teal))}
+
+/* ─── PROGRESS ─── */
+.day-progress{margin-bottom:14px}
+.dp-header{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-weight:600;letter-spacing:0.06em;margin-bottom:5px}
+.dp-track{height:5px;background:var(--s2);border-radius:3px;overflow:hidden}
+.dp-bar{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold2));border-radius:3px;transition:width 0.6s ease}
+
+/* ─── STREAKS ─── */
+.streak-row{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.streak-d{width:34px;height:34px;border-radius:50%;background:var(--s1);border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text3);transition:all 0.3s}
+.streak-d.hit{background:rgba(232,184,75,0.15);border-color:var(--gold);color:var(--gold2)}
+.streak-d.today{box-shadow:0 0 14px rgba(232,184,75,0.3);border-color:var(--gold2)}
+
+/* misc */
+.section-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.section-sub{font-size:11px;color:var(--text3);margin-bottom:14px}
+.sep{height:1px;background:linear-gradient(to right,transparent,var(--br),transparent);margin:16px 0}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid}
+.pill.green{color:var(--em2);border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.08)}
+.pill.gold{color:var(--gold2);border-color:rgba(232,184,75,0.3);background:rgba(232,184,75,0.08)}
+.pill.blue{color:var(--blue2);border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.08)}
+.pill.rose{color:var(--rose2);border-color:rgba(251,113,133,0.3);background:rgba(251,113,133,0.08)}
+
+.info-box{background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:12px;font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:12px}
+.warn-box{background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);border-radius:12px;padding:12px;font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <p>📱 Add to Home Screen for full app experience!</p>
+  <button onclick="installApp()">Install</button>
+  <button onclick="document.getElementById('installBanner').classList.remove('show')" style="border:none;background:none;color:#0a0d14;font-size:18px;padding:0 4px">×</button>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif-container">
+  <div class="notif" id="notifEl">
+    <div class="notif-header">
+      <div class="notif-dot"></div>
+      <div class="notif-title" id="notifTitle">Reminder</div>
+      <div class="notif-dismiss" onclick="dismissNotif()">×</div>
+    </div>
+    <div class="notif-body" id="notifBody">Body</div>
+    <div class="notif-actions">
+      <button class="notif-btn snooze5" onclick="snooze(5)">⏸ 5 min</button>
+      <button class="notif-btn snooze10" onclick="snooze(10)">⏸ 10 min</button>
+      <button class="notif-btn notif-done" onclick="dismissNotif()">✓ Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="app-brand"><div class="dot"></div>Wellness OS</div>
+    <div class="clock" id="clockEl">00:00</div>
+  </div>
+  <div class="fast-pill fasting" id="fastPill">
+    <span id="fastLabel">⏳ FASTING</span>
+    <span class="timer" id="fastTimer">16:00 left</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainEl">
+
+<!-- ═══ TODAY ═══ -->
+<div class="page active" id="pg-today">
+  <div class="today-hero">
+    <div class="hero-glow"></div>
+    <div class="greeting-time" id="greetLabel">GOOD MORNING</div>
+    <div class="greeting">Rise, <em>Champion</em> 🌅</div>
+    <div id="todayDateEl" style="font-size:12px;color:var(--text3);margin-top:4px"></div>
+    <div class="quote-text">"Discipline is the bridge between goals and accomplishment."</div>
+  </div>
+
+  <div class="day-progress">
+    <div class="dp-header"><span>TODAY'S COMPLETION</span><span id="pctEl">0%</span></div>
+    <div class="dp-track"><div class="dp-bar" id="dpBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="streak-row" id="streakEl"></div>
+
+  <div class="stats-row">
+    <div class="stat-box" onclick="goPage('water')">
+      <div class="stat-val" id="sv-water" style="color:var(--cyan2)">0</div>
+      <div class="stat-lbl">Glasses</div>
+      <div class="stat-bar"><div class="stat-fill" id="sf-water" style="width:0%;background:var(--cyan)"></div></div>
+    </div>
+    <div class="stat-box" onclick="goPage('supps')">
+      <div class="stat-val" id="sv-supp" style="color:var(--em2)">0</div>
+      <div class="stat-lbl">Supps</div>
+      <div class="stat-bar"><div class="stat-fill" id="sf-supp" style="width:0%;background:var(--em)"></div></div>
+    </div>
+    <div class="stat-box" onclick="goPage('meditate')">
+      <div class="stat-val" id="sv-med" style="color:var(--violet2)">0</div>
+      <div class="stat-lbl">Meditate</div>
+      <div class="stat-bar"><div class="stat-fill" id="sf-med" style="width:0%;background:var(--violet)"></div></div>
+    </div>
+    <div class="stat-box" onclick="goPage('schedule')">
+      <div class="stat-val" id="sv-task" style="color:var(--gold2)">0</div>
+      <div class="stat-lbl">Tasks ✓</div>
+      <div class="stat-bar"><div class="stat-fill" id="sf-task" style="width:0%;background:var(--gold)"></div></div>
+    </div>
+  </div>
+
+  <div class="next-card" id="nextCard">
+    <div class="next-icon" id="nextIcon">⏰</div>
+    <div>
+      <div class="next-label">COMING UP NEXT</div>
+      <div class="next-name" id="nextName">Loading...</div>
+      <div class="next-time" id="nextTime">--:--</div>
+    </div>
+    <div class="next-badge" id="nextBadge">--:--</div>
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="font-size:10px;font-weight:800;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:10px">TODAY AT A GLANCE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div onclick="goPage('meals')" style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:14px;padding:12px;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">🥗</div>
+        <div style="font-size:12px;font-weight:700;color:var(--em2)">First Meal</div>
+        <div style="font-size:11px;color:var(--text3)">1:30 PM</div>
+      </div>
+      <div onclick="goPage('exercise')" style="background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);border-radius:14px;padding:12px;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">💪</div>
+        <div style="font-size:12px;font-weight:700;color:var(--orange2)">Workout</div>
+        <div style="font-size:11px;color:var(--text3)">7:30 AM</div>
+      </div>
+      <div onclick="goPage('study')" style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:14px;padding:12px;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">🧠</div>
+        <div style="font-size:12px;font-weight:700;color:var(--violet2)">Study AI</div>
+        <div style="font-size:11px;color:var(--text3)">5 hrs/day</div>
+      </div>
+      <div onclick="goPage('antiage')" style="background:rgba(232,184,75,0.06);border:1px solid rgba(232,184,75,0.2);border-radius:14px;padding:12px;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">✨</div>
+        <div style="font-size:12px;font-weight:700;color:var(--gold2)">Anti-Aging</div>
+        <div style="font-size:11px;color:var(--text3)">Protocol</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCHEDULE ═══ -->
+<div class="page" id="pg-schedule">
+  <div class="section-title">📋 Full Day</div>
+  <div class="section-sub">Tap to complete · Current task highlighted</div>
+  <div id="schedList"></div>
+</div>
+
+<!-- ═══ WATER ═══ -->
+<div class="page" id="pg-water">
+  <div class="section-title">💧 Water Tracker</div>
+  <div class="section-sub">64 kg body weight → 2.5L / 10 glasses daily</div>
+  <div class="water-main">
+    <div class="water-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(34,211,238,0.1)" stroke-width="10"/>
+        <circle id="waterCircle" cx="70" cy="70" r="58" fill="none" stroke="url(#wg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="364" style="transition:stroke-dashoffset 0.5s ease"/>
+        <defs><linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>
+      </svg>
+      <div class="water-ring-val">
+        <div class="ring-num" id="waterNum">0</div>
+        <div class="ring-sub" id="waterMl">0/2500ml</div>
+      </div>
+    </div>
+    <div class="glass-grid" id="glassGrid"></div>
+    <div class="water-actions">
+      <button class="btn danger" onclick="removeW()">− Glass</button>
+      <button class="btn primary" onclick="addW()">+ Add Glass</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">⏰ Drink At These Times</div>
+    <div id="waterTimesEl"></div>
+  </div>
+</div>
+
+<!-- ═══ MEALS ═══ -->
+<div class="page" id="pg-meals">
+  <div class="section-title">🥗 Sattvic Meals</div>
+  <div class="section-sub">No onion · No garlic · Eating window 1:30–9:30 PM</div>
+  <div class="info-box">🍽️ <strong>16:8 Rule:</strong> First meal 1:30 PM. All supplements at 1:35 PM. Last meal by 7:30 PM. Eating window closes 9:30 PM.</div>
+  <div class="day-scroll" id="dayChips"></div>
+  <div id="mealContent"></div>
+</div>
+
+<!-- ═══ SUPPS ═══ -->
+<div class="page" id="pg-supps">
+  <div class="section-title">💊 Supplements</div>
+  <div class="section-sub">All taken at 1:35 PM with first meal</div>
+  <div class="warn-box">⚠️ <strong>Take ALL supplements with food at 1:35 PM.</strong> Never on empty stomach. Ashwagandha & Shilajit need food to avoid stomach upset and maximize absorption.</div>
+  <div class="supp-grid" id="suppGrid"></div>
+</div>
+
+<!-- ═══ DETOX ═══ -->
+<div class="page" id="pg-detox">
+  <div class="section-title">🌿 Detox Protocol</div>
+  <div class="section-sub">Ayurvedic · Home remedies · In daily sequence</div>
+  <div id="detoxContent"></div>
+</div>
+
+<!-- ═══ EXERCISE ═══ -->
+<div class="page" id="pg-exercise">
+  <div class="section-title">💪 Exercise</div>
+  <div class="section-sub">Morning focus · Evening walk · 5×/week strength</div>
+  <div id="exContent"></div>
+</div>
+
+<!-- ═══ STUDY ═══ -->
+<div class="page" id="pg-study">
+  <div class="section-title">🧠 AI Study Plan</div>
+  <div class="section-sub">AI Data Platform Engineer · 5 hrs/day · Fastest path</div>
+  <div id="studyContent"></div>
+</div>
+
+<!-- ═══ MEDITATE ═══ -->
+<div class="page" id="pg-meditate">
+  <div class="section-title">🧘 Meditation</div>
+  <div class="section-sub">Twice daily · 15–20 minutes each</div>
+  <div class="med-center">
+    <div class="med-ring" id="medRing" onclick="toggleMed()">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(167,139,250,0.12)" stroke-width="8"/>
+        <circle id="medCircleEl" cx="80" cy="80" r="68" fill="none" stroke="url(#mg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear;transform:rotate(-90deg);transform-origin:center"/>
+        <defs><linearGradient id="mg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs>
+      </svg>
+      <div class="med-ring-inner">
+        <div class="med-time" id="medTimeEl">20:00</div>
+        <div class="med-status" id="medStatusEl">TAP TO START</div>
+      </div>
+    </div>
+    <div class="med-controls">
+      <button class="med-btn" onclick="setMed(15)">15 min</button>
+      <button class="med-btn go" onclick="toggleMed()" id="medGoBtn">▶ Start</button>
+      <button class="med-btn" onclick="setMed(20)">20 min</button>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Sessions for today:</div>
+  <div class="med-sessions" id="medSessions"></div>
+</div>
+
+<!-- ═══ SLEEP ═══ -->
+<div class="page" id="pg-sleep">
+  <div class="section-title">🌙 Sleep Plan</div>
+  <div class="section-sub">10:30 PM work end · 11:30 PM sleep · 6:30 AM wake</div>
+  <div id="sleepContent"></div>
+</div>
+
+<!-- ═══ GROOMING ═══ -->
+<div class="page" id="pg-grooming">
+  <div class="section-title">✨ Grooming</div>
+  <div class="section-sub">Face · Bath · Hair · Skin · Posture · Style</div>
+  <div id="groomContent"></div>
+</div>
+
+<!-- ═══ ANTI-AGING ═══ -->
+<div class="page" id="pg-antiage">
+  <div class="antiage-hero">
+    <div class="antiage-title">⚡ Anti-Aging Protocol</div>
+    <div class="antiage-sub">Science-backed 2025 research. Fastest visible results. Ayurvedic + modern. Start now — results visible in 4–8 weeks with consistency.</div>
+  </div>
+  <div id="antiageContent"></div>
+</div>
+
+<!-- ═══ GROWTH ═══ -->
+<div class="page" id="pg-growth">
+  <div class="section-title">🚀 Personal Growth</div>
+  <div class="section-sub">Communication · Mindset · Career · Body · Wealth</div>
+  <div id="growthContent"></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" data-page="today" onclick="goPage('today')"><div class="nav-icon">🏠</div><div class="nav-label">Today</div></button>
+  <button class="nav-btn" data-page="schedule" onclick="goPage('schedule')"><div class="nav-icon">📋</div><div class="nav-label">Schedule</div></button>
+  <button class="nav-btn" data-page="water" onclick="goPage('water')"><div class="nav-icon">💧</div><div class="nav-label">Water</div></button>
+  <button class="nav-btn" data-page="meals" onclick="goPage('meals')"><div class="nav-icon">🥗</div><div class="nav-label">Meals</div></button>
+  <button class="nav-btn" data-page="antiage" onclick="goPage('antiage')"><div class="nav-icon">✨</div><div class="nav-label">Anti-Age</div></button>
+  <button class="nav-btn" data-page="growth" onclick="goPage('growth')"><div class="nav-icon">🚀</div><div class="nav-label">Growth</div></button>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+const SCHEDULE=[
+  {t:"06:00",emoji:"🌅",title:"Wake Up — Do NOT Snooze",desc:"Feet on floor immediately. The discipline starts here.",cat:"morning",color:"var(--gold)"},
+  {t:"06:02",emoji:"👅",title:"Tongue Scraping + Oil Pulling",desc:"Copper scraper 7 strokes. Then 1 tbsp sesame oil swish 5 min — spit. Removes overnight toxins.",cat:"grooming",color:"var(--rose2)"},
+  {t:"06:08",emoji:"🍋",title:"Warm Lemon Water",desc:"1 glass warm water + ½ lemon juice. Does NOT break fast. Flushes toxins, wakes digestion.",cat:"detox",color:"var(--em)"},
+  {t:"06:15",emoji:"🫙",title:"Amla Juice (20ml diluted)",desc:"20ml amla + 80ml warm water. Empty stomach. Vitamin C, liver detox, hair & immunity.",cat:"detox",color:"var(--em)"},
+  {t:"06:25",emoji:"🌱",title:"Tulsi Tea (Fasting OK)",desc:"5 tulsi leaves + ginger in hot water. Immunity, lung cleanse, stress relief. Zero calories.",cat:"detox",color:"var(--em)"},
+  {t:"06:35",emoji:"🧘",title:"Meditation — Session 1",desc:"15–20 min. Pranayama: Kapalbhati 5 min → Anulom Vilom 5 min → Silent sitting. Sets the day.",cat:"meditation",color:"var(--violet)"},
+  {t:"07:00",emoji:"🚶",title:"Morning Walk + Sunlight",desc:"20–30 min outdoor. Morning sun sets circadian rhythm, Vitamin D, mental clarity.",cat:"exercise",color:"var(--orange)"},
+  {t:"07:35",emoji:"🌞",title:"Surya Namaskar (12 rounds)",desc:"Sun salutation — full body warm-up, weight loss, flexibility. Foundation of morning fitness.",cat:"exercise",color:"var(--orange)"},
+  {t:"07:55",emoji:"💪",title:"Main Workout (45–60 min)",desc:"Strength alternating days. See Exercise tab for full plan.",cat:"exercise",color:"var(--orange)"},
+  {t:"09:00",emoji:"🚿",title:"Cold-Warm Shower",desc:"Warm 3 min → finish 30 sec cold. Cold stimulates alertness, blood flow, hair growth.",cat:"grooming",color:"var(--rose2)"},
+  {t:"09:15",emoji:"✨",title:"Full Grooming Routine",desc:"Face wash → SPF → moisturizer → hair oil (3x/week). See Grooming tab.",cat:"grooming",color:"var(--rose2)"},
+  {t:"09:45",emoji:"🍵",title:"Green Tea + Study Prep",desc:"1 cup green tea (no sugar). Review yesterday's notes. Prepare today's study materials.",cat:"study",color:"var(--violet)"},
+  {t:"10:00",emoji:"📚",title:"Deep Study Block 1 — 2.5 hrs",desc:"AI fundamentals. Karpathy / Stanford CS336. Phone DND. Full focus.",cat:"study",color:"var(--violet)"},
+  {t:"12:00",emoji:"💧",title:"Water Break (2 glasses)",desc:"You need 3+ glasses by now. 10 min movement break — stand, stretch, rest eyes.",cat:"water",color:"var(--cyan)"},
+  {t:"12:30",emoji:"🌿",title:"CCF Detox Tea",desc:"Cumin+Coriander+Fennel tea 30 min before eating. Prepares Agni. Anti-bloating.",cat:"detox",color:"var(--em)"},
+  {t:"13:30",emoji:"🍱",title:"⭐ FIRST MEAL — Eating Window Opens",desc:"Break fast gently. Largest meal of the day. Warm, sattvic, balanced. See Meals tab.",cat:"eating",color:"var(--gold)"},
+  {t:"13:35",emoji:"💊",title:"ALL Supplements — Take Now",desc:"Ashwagandha + Shilajit + Moringa + Biotin + Hair 1 + Hair 2. With first meal.",cat:"supplement",color:"var(--em)"},
+  {t:"15:00",emoji:"🍎",title:"Afternoon Snack",desc:"Soaked nuts, seasonal fruit, coconut water. Light sattvic snack.",cat:"eating",color:"var(--gold)"},
+  {t:"16:00",emoji:"💼",title:"Work Begins",desc:"1 PM to 11 PM working hours. Apply deep focus principles.",cat:"work",color:"var(--blue)"},
+  {t:"16:30",emoji:"🧠",title:"Study Block 2 — AI Coding (90 min)",desc:"Practical: build current project. LangGraph, Vertex AI, BigQuery Vector. LangSmith trace.",cat:"study",color:"var(--violet)"},
+  {t:"17:00",emoji:"💧",title:"Water Reminder (2 glasses)",desc:"You should have 5+ glasses by now. Energy dip = dehydration, not hunger.",cat:"water",color:"var(--cyan)"},
+  {t:"18:30",emoji:"🍵",title:"Second Green Tea (Last Cup)",desc:"Antioxidants, metabolism. MAXIMUM 2 cups/day. No tea after 6 PM — affects sleep.",cat:"detox",color:"var(--em)"},
+  {t:"19:00",emoji:"🌿",title:"Triphala Tea (Pre-Dinner)",desc:"1 tsp triphala in warm water. 30 min before dinner. Bowel health, detox, skin clarity.",cat:"detox",color:"var(--em)"},
+  {t:"19:30",emoji:"🥘",title:"Dinner — Light Sattvic Meal",desc:"Smaller than lunch. Dal, sabzi, roti. Eat mindfully. No screens at table.",cat:"eating",color:"var(--gold)"},
+  {t:"20:30",emoji:"🚶",title:"Evening Walk (Post-Dinner)",desc:"15–20 min slow walk. Critical for digestion, blood sugar, and quality sleep.",cat:"exercise",color:"var(--orange)"},
+  {t:"21:00",emoji:"💧",title:"Last Water Glass",desc:"Final glasses. Stop large amounts 90 min before sleep.",cat:"water",color:"var(--cyan)"},
+  {t:"21:30",emoji:"⏸",title:"⭐ EATING WINDOW CLOSES",desc:"Stop all food. 16-hour fast begins now. Only herbal tea if needed.",cat:"eating",color:"var(--gold)"},
+  {t:"21:45",emoji:"🧘",title:"Evening Meditation — Session 2",desc:"15–20 min. Body scan, gratitude, breathwork. Non-negotiable for recovery.",cat:"meditation",color:"var(--violet)"},
+  {t:"22:30",emoji:"🌙",title:"Wind Down — End Work",desc:"Hard stop. Blue light glasses. Dim all lights. Close laptop.",cat:"sleep",color:"var(--blue)"},
+  {t:"23:00",emoji:"🥛",title:"Turmeric Golden Milk",desc:"Warm A2 milk + ½ tsp turmeric + black pepper + honey. Deep sleep, anti-aging, skin glow.",cat:"grooming",color:"var(--rose2)"},
+  {t:"23:10",emoji:"📓",title:"Journaling — 5 min",desc:"3 wins today. 1 lesson. 1 top priority tomorrow. Closes mental loops for deep sleep.",cat:"growth",color:"var(--gold)"},
+  {t:"23:20",emoji:"📖",title:"Reading — 15 min",desc:"Physical book only. No screens. Chip Huyen, mindset book, or technical paper.",cat:"study",color:"var(--violet)"},
+  {t:"23:30",emoji:"💤",title:"SLEEP",desc:"7 hours. Phone outside room. Room cool + dark. Left side sleeping. Non-negotiable.",cat:"sleep",color:"var(--blue)"},
+];
+
+const SUPPS=[
+  {em:"🌿",name:"Ashwagandha",benefit:"Stress ↓, testosterone ↑, energy, focus, cortisol ↓",when:"1:35 PM with meal",note:"Do NOT take on empty stomach. With warm meal for best absorption."},
+  {em:"🪨",name:"Shilajit",benefit:"Minerals, vitality, testosterone, anti-aging, energy",when:"1:35 PM with meal",note:"Dissolve pea-size resin in warm water, take with first meal."},
+  {em:"💚",name:"Moringa Capsule",benefit:"Iron, vitamins, detox, energy, anti-inflammatory",when:"1:35 PM with meal",note:"Powerful detox. Can optionally split: 1 with lunch, 1 with dinner."},
+  {em:"💛",name:"Biotin",benefit:"Hair growth, nails, skin, metabolism",when:"1:35 PM with fatty meal",note:"Take with a meal containing healthy fats (ghee, nuts) for absorption."},
+  {em:"💊",name:"Hair Product 1",benefit:"Hair growth support, follicle health",when:"1:35 PM with meal",note:"Follow product-specific instruction. Generally with meals."},
+  {em:"🔵",name:"Hair Product 2",benefit:"Hair strength, thickness, scalp health",when:"1:35 PM with meal",note:"As per product label. Consistent daily intake is critical."},
+];
+
+const DETOX=[
+  {icon:"🍋",name:"Warm Lemon Water",when:"6:08 AM — Fasting OK (zero calories)",recipe:"1 glass warm water (not hot) + fresh ½ lemon. Alkalizes body, flushes overnight toxins, wakes digestion. Drink before anything else."},
+  {icon:"🫙",name:"Amla / Indian Gooseberry Juice",when:"6:15 AM — Empty stomach (BEST timing)",recipe:"20ml fresh amla juice + 80ml warm water. Add pinch rock salt. Liver detox, Vitamin C (20x lemon), hair growth, immunity boost, skin glow."},
+  {icon:"🌱",name:"Tulsi-Ginger Fasting Tea",when:"6:25 AM — Fasting window OK",recipe:"5 tulsi (holy basil) leaves + ½ tsp grated ginger + 1 cup hot water. Steep 5 min. Immunity, lung cleanse, cortisol ↓. Zero calories."},
+  {icon:"🌿",name:"CCF Digestive Tea",when:"12:30 PM — 30 min before first meal",recipe:"½ tsp each: cumin seeds + coriander seeds + fennel seeds. Boil in 2 cups water 8 min, strain. Prepares Agni, eliminates bloating, anti-gas."},
+  {icon:"🍵",name:"Green Tea + Lemon",when:"9:45 AM + 6:30 PM (2 cups MAX daily)",recipe:"1 tsp green tea. 80°C water (not boiling — prevents bitterness). Steep 2 min. Squeeze ½ lemon. Antioxidants, metabolism ↑, focus."},
+  {icon:"🧄",name:"Ginger-Turmeric Detox Shot",when:"With any meal during eating window",recipe:"1-inch fresh ginger + ¼ tsp turmeric + pinch black pepper + warm water. Blend or steep. Anti-inflammatory, liver cleanse, immunity."},
+  {icon:"🌱",name:"Triphala Tea",when:"7:00 PM — 30 min before dinner",recipe:"1 tsp triphala powder in warm water, soak 10 min, strain. Bowel regularity, colon detox, skin clarity, anti-aging. One of Ayurveda's greatest herbs."},
+  {icon:"🥛",name:"Golden Turmeric Milk",when:"11:00 PM — Before sleep",recipe:"1 cup warm A2 milk + ½ tsp turmeric + pinch black pepper + 1 tsp honey + cardamom. Anti-inflammatory, promotes deep sleep, skin repair."},
+];
+
+const MEALS={
+  Mon:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Moong Dal Khichdi + Fruit",items:"• 1 bowl moong dal khichdi (moong+rice+ghee+cumin+ginger+turmeric)\n• 1 banana or seasonal fruit\n• CCF tea or warm water",note:"Break fast gently with khichdi — easily digestible, sattvic, complete nutrition."},
+    {t:"4:00 PM",label:"SNACK",name:"Soaked Nuts + Coconut Water",items:"• 5 soaked almonds + 3 walnuts + 2 dates\n• 1 tender coconut water (natural electrolytes)",note:"Nuts soaked overnight = easier digestion. Dates = iron + hair health."},
+    {t:"7:30 PM",label:"DINNER (Light)",name:"Dal Tadka + Roti + Sabzi",items:"• Masoor dal (hing+cumin+ginger+tomato — NO onion/garlic)\n• 2 whole wheat rotis + desi ghee\n• Aloo-palak sabzi\n• Small bowl curd",note:"Hing (asafoetida) replaces onion/garlic — same digestive benefit, 100% sattvic."},
+  ],
+  Tue:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Poha + Sweet Lassi",items:"• Poha (flattened rice + hing+mustard+curry leaves+ginger+turmeric)\n• 1 glass lassi (curd+water+cardamom)\n• 1 bowl papaya",note:"Poha = sattvic, energizing, iron-rich. Perfect first meal."},
+    {t:"4:00 PM",label:"SNACK",name:"Makhana + CCF Tea",items:"• Roasted makhana (fox nuts) with rock salt + turmeric + ghee\n• 1 cup CCF tea",note:"Makhana = high protein, sattvic, excellent for hair and joints."},
+    {t:"7:30 PM",label:"DINNER",name:"Upma + Rasam",items:"• Semolina upma (carrot+peas+capsicum — no onion/garlic)\n• 1 bowl tomato rasam (hing+ginger+pepper+mustard)\n• Small curd rice",note:""},
+  ],
+  Wed:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Besan Chilla + Chutney",items:"• 2 besan chillas (chickpea flour+ajwain+ginger+turmeric)\n• Green coriander-mint chutney (no garlic)\n• 1 bowl pomegranate",note:"Besan = excellent plant protein. High protein first meal is ideal."},
+    {t:"4:00 PM",label:"SNACK",name:"Fruit Plate + Herbal Tea",items:"• Mixed seasonal fruits: mango/pomegranate/guava/papaya\n• 1 cup ginger-lemon tea",note:""},
+    {t:"7:30 PM",label:"DINNER",name:"Rajma + Jeera Rice",items:"• Rajma (no onion/garlic — hing+cumin+ginger+tomato)\n• ½ cup jeera rice with ghee\n• Cucumber-tomato salad + curd",note:"Rajma = complete protein. Excellent for muscle building."},
+  ],
+  Thu:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Idli + Sambar",items:"• 4 soft idlis (fermented, probiotic)\n• Sambar (hing+ginger+vegetables — no onion/garlic)\n• Coconut-ginger chutney\n• 1 banana",note:"Fermented idli = probiotic benefit + easily digestible. Classic sattvic."},
+    {t:"4:00 PM",label:"SNACK",name:"Roasted Chana + Amla Candy",items:"• Roasted kala chana (protein rich)\n• 2 pieces dried amla candy (hair health)\n• 1 cup tulsi tea",note:""},
+    {t:"7:30 PM",label:"DINNER",name:"Khichdi + Ghee",items:"• Large bowl khichdi (moong+rice+ghee+turmeric+cumin+ginger)\n• 1 tsp extra desi ghee on top\n• Roasted papad + buttermilk",note:"Ayurveda's greatest dinner. Light, complete, sleep-promoting."},
+  ],
+  Fri:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Sattvic Pulao + Raita",items:"• Vegetable pulao (peas+carrots+beans+mint — no onion/garlic)\n• Boondi raita (curd+cumin+coriander)\n• Glass sweet lassi",note:""},
+    {t:"4:00 PM",label:"SNACK",name:"Dates + Warm Milk",items:"• 3 Medjool dates (iron, energy, hair)\n• 1 cup warm A2 milk with cardamom\n• 5 soaked cashews",note:"Dates + milk = powerful Ayurvedic hair and energy tonic."},
+    {t:"7:30 PM",label:"DINNER",name:"Palak Paneer + Roti",items:"• Palak paneer (no onion/garlic — use hing)\n• 2 whole wheat rotis\n• Kachumber salad + dahi",note:"Palak = iron. Paneer = calcium + protein. Perfect combination."},
+  ],
+  Sat:[
+    {t:"1:30 PM",label:"BREAK FAST",name:"Dosa + Sambar",items:"• 2 plain dosa (fermented — probiotic)\n• Sambar with vegetables\n• Coconut-ginger chutney\n• Buttermilk",note:"Weekend treat. Fermented food = gut health + immunity."},
+    {t:"4:00 PM",label:"SNACK",name:"Seeds Smoothie Bowl",items:"• Banana+mango+coconut milk blended\n• Topped: chia+flax+sesame seeds+honey",note:"Seeds = excellent for hair, skin, hormones."},
+    {t:"7:30 PM",label:"DINNER",name:"Chole + Light Bhatura",items:"• Chole (chickpeas — hing+ginger+tomato — no onion/garlic)\n• 1 bhatura or puri\n• Green chutney + curd",note:"Chickpeas = highest plant protein. Great for muscle and hair."},
+  ],
+  Sun:[
+    {t:"1:30 PM",label:"BREAK FAST (Special)",name:"Sweet Pongal",items:"• Sweet Pongal (rice+moong+jaggery+cardamom+ghee)\n• Ginger-cardamom tea\n• Fresh fruit bowl",note:"Sattvic, nourishing, celebratory Sunday meal."},
+    {t:"4:00 PM",label:"SNACK",name:"Sprouts Chaat",items:"• Mixed sprouts (moong+kala chana+lemon+rock salt+coriander+ginger)\n• Fresh lemonade with mint\n• Pumpkin seeds",note:"Sprouts = maximum nutrition density. Best sattvic snack."},
+    {t:"7:30 PM",label:"DINNER",name:"Sattvic Biryani + Raita",items:"• Vegetable biryani (no onion/garlic — hing+cardamom+cloves+saffron)\n• Mirchi salan\n• Mint raita",note:"Special Sunday dinner. Earned it!"},
+  ],
+};
+
+const EXERCISE={
+  "🌅 Morning — Daily (Non-Negotiable)":[
+    {em:"🙏",name:"Surya Namaskar",detail:"12 rounds. Full body warm-up, weight loss, flexibility, spinal health.",dur:"15 min"},
+    {em:"🫁",name:"Kapalbhati Pranayama",detail:"5 min rapid breathing. Detox, belly fat, lung capacity, clarity.",dur:"5 min"},
+    {em:"🌬️",name:"Anulom Vilom",detail:"5 min alternate nostril. Balances nervous system, reduces stress.",dur:"5 min"},
+  ],
+  "💪 Strength (Mon/Wed/Fri)":[
+    {em:"🤜",name:"Push-ups",detail:"4 sets × 20 reps. Wide+narrow+diamond. Chest, shoulders, triceps.",dur:"10 min"},
+    {em:"🏋️",name:"Pull-ups / Rows",detail:"4 sets × max reps. Back, biceps, posture improvement.",dur:"10 min"},
+    {em:"🦵",name:"Squats",detail:"4 × 25 reps. Pause at bottom. Testosterone builder. King of exercises.",dur:"8 min"},
+    {em:"🧱",name:"Plank + Core",detail:"3 × 60 sec plank + 20 crunches + 15 leg raises.",dur:"10 min"},
+    {em:"🏅",name:"Shoulder Press",detail:"4 × 15 reps. Builds posture, V-taper, confidence.",dur:"8 min"},
+  ],
+  "🏃 Cardio (Tue/Thu/Sat)":[
+    {em:"🏃",name:"Brisk Walk / Run",detail:"30 min outdoor. Morning sunlight crucial for Vitamin D + circadian rhythm.",dur:"30 min"},
+    {em:"🪢",name:"Jump Rope",detail:"3 × 3 min. Burns fat, coordination, cardiovascular health.",dur:"12 min"},
+  ],
+  "🌙 Evening — Daily":[
+    {em:"🚶",name:"Post-Dinner Walk",detail:"Slow 15-20 min walk. Critical for digestion, blood sugar, sleep quality.",dur:"20 min"},
+    {em:"🧘",name:"Full Body Stretch",detail:"5 min before sleep. Prevents soreness, promotes recovery.",dur:"5 min"},
+  ],
+};
+
+const STUDY=[
+  {t:"10:00–12:30 PM",name:"Deep Study Block 1 (2.5 hrs)",tasks:"✦ Current roadmap layer: Math / DL / LLMs / RAG / Agents\n✦ Technique: 50 min focus → 10 min break → repeat\n✦ Type every code example — no passive watching\n✦ Resources: Karpathy / Umar Jamil / Stanford CS336",tip:"Hardest content here. Pre-prepare materials night before."},
+  {t:"4:30–6:00 PM",name:"Work-Adjacent Coding Block (90 min)",tasks:"✦ Build current project module on GCP\n✦ LangGraph agent / Vertex AI / BigQuery Vector Search\n✦ Everything traced in LangSmith\n✦ Apply morning learning to actual code today",tip:"Learn by building. Theory from AM → Code in PM."},
+  {t:"9:00–10:30 PM",name:"Evening Review Block (90 min)",tasks:"✦ Read: Chip Huyen / Lilian Weng / Latent Space 2025\n✦ Write LinkedIn post draft about today's learning\n✦ Review morning concepts with Anki flashcards\n✦ Plan tomorrow's study goal specifically",tip:"No new hard concepts. Consolidate and write."},
+  {t:"Always On",name:"Micro-Learning Habits",tasks:"✦ Morning walk: Latent Space podcast / Karpathy talks\n✦ Meals: Mental recap of morning session\n✦ Breaks: 5 min Arxiv Sanity scan\n✦ Before sleep: Visualize code you built today",tip:"5 hrs focused daily = AI expert in 12 months."},
+];
+
+const SLEEP_PLAN=[
+  {t:"10:30 PM",act:"⏸ Work Hard Stop",note:"Close laptop physically. No exceptions. Your sleep is training recovery."},
+  {t:"10:35 PM",act:"Blue Light Cut",note:"Blue light glasses or night mode on all devices. This triggers melatonin production."},
+  {t:"10:45 PM",act:"🧘 Evening Meditation",note:"15–20 min body scan, gratitude, breath work. Clears mental backlog."},
+  {t:"11:05 PM",act:"Night Grooming",note:"Oil cleanse → face wash → night moisturizer → hair oil if needed."},
+  {t:"11:15 PM",act:"🥛 Golden Milk",note:"Warm A2 milk + turmeric + black pepper + honey. Deep sleep + anti-aging."},
+  {t:"11:20 PM",act:"📓 Journaling",note:"3 wins. 1 lesson. 1 tomorrow priority. 5 min only. Closes mental loops."},
+  {t:"11:30 PM",act:"💤 SLEEP",note:"Phone outside room or face-down DND. Cool dark room. Left side sleeping. 7 hrs."},
+  {t:"06:30 AM",act:"🌅 Wake Up",note:"No snooze button. Ever. Feet on floor immediately. 7 hours complete."},
+];
+
+const GROOMING={
+  "🌅 Morning Ritual":[
+    {em:"👅",name:"Tongue Scraping",note:"Copper scraper. 7 strokes. Before drinking ANYTHING. Removes ama (toxins).",t:"6:02 AM"},
+    {em:"🪷",name:"Oil Pulling",note:"1 tbsp sesame oil. Swish 5 min. Spit in trash. Oral detox, teeth whitening.",t:"6:04 AM"},
+    {em:"🚿",name:"Cold-Warm Shower",note:"Warm 3 min → cold 30 sec. Cold = alertness, hair follicle stimulation, glow.",t:"9:00 AM"},
+    {em:"🧴",name:"Face Wash",note:"Sulfate-free. Pat dry (never rub). Follow with moisturizer within 60 seconds.",t:"9:10 AM"},
+    {em:"☀️",name:"SPF 30+ Moisturizer",note:"DAILY — even indoors. UV through windows causes 80% of facial aging. Non-negotiable.",t:"9:12 AM"},
+    {em:"💆",name:"Scalp Oil Massage",note:"3×/week: warm coconut or bhringraj oil. 5 min scalp massage stimulates follicles.",t:"9:15 AM (3x)"},
+    {em:"👁️",name:"Eye Depuff",note:"Cold spoon or cold water splash. Reduces puffiness. Instant appearance upgrade.",t:"9:17 AM"},
+  ],
+  "💄 Posture + Appearance":[
+    {em:"🧍",name:"Posture Practice",note:"Feet shoulder-width. Spine neutral. Shoulders back. Chin level. 5 min daily — transforms how others perceive you.",t:"Morning"},
+    {em:"🚶",name:"Walking Style",note:"Intention walk: chin up, shoulders back, arms relaxed. Walk like you belong.",t:"Morning walk"},
+    {em:"💪",name:"Posture Exercises",note:"Wall angels 10 reps + face pulls 20 reps + thoracic rotations. Fixes desk hunch.",t:"After workout"},
+    {em:"✂️",name:"Haircut Schedule",note:"Every 3 weeks. Well-maintained hair = attention to detail. Non-negotiable.",t:"Every 21 days"},
+  ],
+  "🌙 Night Ritual":[
+    {em:"🧼",name:"Double Cleanse",note:"Oil cleanser (removes SPF + grime) → water-based face wash. Essential for skin.",t:"11:05 PM"},
+    {em:"🌿",name:"Neem Mask",note:"2×/week: neem powder + rose water. 15 min. Clears pores, antibacterial, even tone.",t:"11:07 PM (2x)"},
+    {em:"🥛",name:"Night Cream",note:"Thicker cream or aloe vera on damp skin. Skin repairs during sleep — help it.",t:"11:10 PM"},
+    {em:"💇",name:"Hair Combing",note:"Gentle 50 strokes. Distributes natural oils. Apply leave-in if dry.",t:"11:12 PM"},
+  ],
+};
+
+const ANTIAGE=[
+  {cat:"SKIN",name:"SPF Is The #1 Anti-Aging Tool",timeline:"Results: 4–8 weeks",actions:["Apply SPF 30+ every single morning — even indoors (UV penetrates glass)","UV rays cause 80% of visible facial aging — wrinkles, spots, sagging","Without SPF, all other skincare is fighting uphill","Use a moisturizer WITH SPF to simplify. Reapply if outdoors 2+ hrs.","Bonus: vitamin C serum in morning + retinol at night (most evidence-backed duo)"]},
+  {cat:"HORMONES",name:"Boost Testosterone Naturally",timeline:"Results: 4–12 weeks",actions:["Heavy compound lifts (squats, pull-ups) spike testosterone more than any supplement","Sleep 7+ hours — testosterone produced primarily during deep sleep. 1 hr less = 15% drop.","Ashwagandha + Shilajit (you're already taking these) — proven testosterone support","Cut sugar and ultra-processed food — directly suppresses testosterone","Morning sunlight + cold exposure both boost testosterone significantly"]},
+  {cat:"CELLULAR",name:"Activate Autophagy via Fasting",timeline:"Starts at hour 14–16 of fast",actions:["Your 16:8 fasting DIRECTLY activates autophagy — cellular self-cleaning mechanism","Autophagy removes damaged proteins and organelles — the root of aging reversal","Maximum autophagy at 16+ hours. Your fast hits this perfectly at 9:30 AM.","Avoid breaking fast with high sugar — defeats autophagy benefit","Satvic food = lower inflammation = slower cellular aging"]},
+  {cat:"SKIN NUTRITION",name:"Eat for Skin from Within",timeline:"Results: 6–10 weeks",actions:["Amla/Vitamin C daily (you're doing this) — collagen synthesis, antioxidant protection","Ghee + healthy fats daily — fat-soluble vitamins A,D,E,K for skin glow and elasticity","Turmeric (in golden milk) — curcumin reduces skin inflammation and oxidative stress","Avoid: sugar, refined flour, fried food — directly cause glycation (skin aging)","Saffron: add a few strands to warm milk 3× week — skin brightening, scientifically proven"]},
+  {cat:"SLEEP",name:"Sleep is Your Anti-Aging Superpower",timeline:"Results: 1–2 weeks visible",actions:["HGH (Human Growth Hormone) secreted 80% during sleep — rebuilds skin, muscle, collagen","1 night of poor sleep visible on face immediately. Consistent sleep = reverse aging.","11:30 PM hard sleep time — circadian rhythm alignment reduces biological age","Turmeric milk you're taking = promotes deep sleep + skin repair simultaneously","Dark cool room + no phone = deeper sleep stages where anti-aging happens"]},
+  {cat:"HAIR",name:"Fastest Hair Growth Protocol",timeline:"Results: 6–12 weeks",actions:["Scalp massage 5 min daily with bhringraj oil = proven to rival minoxidil in studies","Biotin + Shilajit + Moringa (you're taking all) = complete hair nutrition stack","Amla juice daily = highest natural source of Vitamin C for collagen in hair follicle","Avoid: hot showers on scalp (damages follicles), tight hair ties, SLS shampoos","Derma roller 0.5mm on scalp 1× week = increases absorption of oils 4× and stimulates growth"]},
+  {cat:"MIND-BODY",name:"Stress = The Accelerated Aging Driver",timeline:"Results: 2–4 weeks",actions:["Meditation twice daily (you're doing this) = lowers cortisol = directly slows aging","High cortisol destroys collagen, shrinks brain, depletes testosterone — the aging hormone","Exercise reduces cortisol and raises BDNF — literally reverses brain aging","Journaling each night = closes stress loops that keep cortisol elevated during sleep","Practice: nothing gets your cortisol except life-or-death situations. Choose calm."]},
+  {cat:"BONUS ADVANCED",name:"Add These to Accelerate",timeline:"Results: 8–16 weeks",actions:["Collagen peptide powder: add to warm water or milk daily — proven skin elasticity improvement","Cold showers: vasoconstriction → vasodilation cycle = youthful skin tone + immunity","Zinc: found in pumpkin seeds and nuts — critical for testosterone and skin wound healing","Magnesium glycinate 400mg at night: deep sleep promoter, reduces inflammation, anti-aging","Neem capsule 1×/day: blood purifier, skin clarity, anti-aging in Ayurveda"]},
+];
+
+const GROWTH=[
+  {cat:"COMMUNICATION",name:"Speak With Power and Precision",items:["Record yourself 2 min daily. Listen back. Kill filler words (um, uh, basically, like).","Use PREP method: Point → Reason → Example → Point. For every explanation, every day.","Slow down speech 20%. Confident people speak slower. Pause before answering — it signals thinking, not weakness.","Read 'How to Win Friends' by Dale Carnegie. Then '48 Laws of Power'. Then 'Never Split the Difference'.","Have 1 intentional conversation daily where you practice active listening completely."]},
+  {cat:"PHYSICAL",name:"Build Your Best Body — Now",items:["Consistency over intensity. Showing up when you don't want to is the actual workout.","Dress one level above every occasion. Fit > brand. Get basics tailored if needed.","Posture investment: this single change transforms how every person perceives you. Practice daily.","Smile genuinely and often. The most powerful appearance upgrade. Completely free.","Haircut every 21 days. Beard trimmed/shaped weekly. Groomed = signals discipline."]},
+  {cat:"MINDSET",name:"Operate Like a Top 1% Person",items:["Morning affirmation (say aloud): 'I am becoming the best version of myself, daily, with discipline and joy.'","Sunday night: score yourself 1–10 on each pillar (health, study, work, relationships). Adjust.","Replace all social scroll with: Latent Space podcast / Karpathy talks / Chip Huyen blog.","Read 15 pages every night before sleep. Compound learning across years.","Your environment IS your future. Change what you see, hear, and who you're around."]},
+  {cat:"CAREER",name:"Become Irreplaceable in AI",items:["5 hours focused daily learning. This is your $200K+ investment. Treat it seriously.","1 LinkedIn post per week without exception. Month 12 = 52 posts = recognized expert.","1 open source PR per month to LangChain, LlamaIndex, or LangGraph. Your name in a major repo = permanent credential.","Apply for jobs before you feel ready. Imposter syndrome = you're at the growth edge.","Reach out to 3 senior AI engineers monthly. Ask for 15 min call. Most will say yes."]},
+  {cat:"ENERGY",name:"Protect Your Energy Like a CEO",items:["Non-negotiables: 7 hrs sleep + meditation + morning walk. These are not lifestyle. They are performance infrastructure.","Say no to everything that doesn't move you toward your 12-month target. Everything else is distraction.","Your income = average of 5 closest people. Audit your circle. Upgrade it intentionally.","Energy audit monthly: top 3 drains. Systematically eliminate or minimize each one.","Track energy: AM/PM/EVE score daily. Know your peak hours. Do hardest work then."]},
+];
+
+// ═══════════════════ STATE ═══════════════════
+const KEY='wellness_v2';
+function loadState(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}}
+function saveState(){localStorage.setItem(KEY,JSON.stringify(ST))}
+let ST=loadState();
+function today(){return new Date().toISOString().split('T')[0]}
+function getDay(){if(!ST[today()])ST[today()]={water:0,supps:{},sched:{},ex:{},groom:{},med:{sessions:0}};return ST[today()]}
+
+// ═══════════════════ CLOCK & FASTING ═══════════════════
+function tick(){
+  const now=new Date();
+  const h=now.getHours(),m=now.getMinutes();
+  document.getElementById('clockEl').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  const mins=h*60+m;
+  const eatStart=13*60+30, eatEnd=21*60+30;
+  const eating=mins>=eatStart&&mins<eatEnd;
+  const pill=document.getElementById('fastPill');
+  const label=document.getElementById('fastLabel');
+  const timer=document.getElementById('fastTimer');
+  if(eating){
+    pill.className='fast-pill eating';
+    const rem=eatEnd-mins;
+    label.textContent='🟢 EATING WINDOW';
+    timer.textContent=`${Math.floor(rem/60)}h ${rem%60}m left`;
+  }else{
+    pill.className='fast-pill fasting';
+    const until=mins<eatStart?eatStart-mins:(24*60-mins+eatStart);
+    label.textContent='⏳ FASTING';
+    timer.textContent=`${Math.floor(until/60)}h ${until%60}m to meal`;
+  }
+  // greeting
+  const g=h<12?'Good Morning ☀️':h<17?'Good Afternoon 🌤️':h<21?'Good Evening 🌅':'Good Night 🌙';
+  const gl=document.getElementById('greetLabel');
+  if(gl)gl.textContent=g.toUpperCase();
+  checkAlarms(h,m);
+}
+
+// ═══════════════════ ALARM ═══════════════════
+let lastAlarmMin=-1,snoozeTimer=null;
+function checkAlarms(h,m){
+  const mins=h*60+m;
+  if(mins===lastAlarmMin)return;
+  const tStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  const item=SCHEDULE.find(s=>s.t===tStr);
+  if(item){lastAlarmMin=mins;fireNotif(`${item.emoji} ${item.t} — ${item.title}`,item.desc);}
+}
+function fireNotif(title,body){
+  document.getElementById('notifTitle').textContent=title;
+  document.getElementById('notifBody').textContent=body;
+  document.getElementById('notifEl').classList.add('show');
+  if('Notification'in window&&Notification.permission==='granted')
+    new Notification(title,{body,silent:false});
+  setTimeout(dismissNotif,40000);
+}
+function dismissNotif(){document.getElementById('notifEl').classList.remove('show');}
+function snooze(mins){
+  dismissNotif();
+  const t=document.getElementById('notifTitle').textContent;
+  const b=document.getElementById('notifBody').textContent;
+  clearTimeout(snoozeTimer);
+  snoozeTimer=setTimeout(()=>fireNotif(`⏰ (Snoozed) ${t}`,b),mins*60*1000);
+}
+
+// ═══════════════════ NAVIGATION ═══════════════════
+const PAGES=['today','schedule','water','meals','supps','detox','exercise','study','meditate','sleep','grooming','antiage','growth'];
+function goPage(id){
+  PAGES.forEach(p=>{
+    const pg=document.getElementById(`pg-${p}`);
+    if(pg)pg.classList.toggle('active',p===id);
+  });
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  document.getElementById('mainEl').scrollTop=0;
+  renderPage(id);
+}
+function renderPage(id){
+  const renders={schedule:renderSchedule,water:renderWater,meals:renderMeals,supps:renderSupps,detox:renderDetox,exercise:renderEx,study:renderStudy,meditate:renderMed,sleep:renderSleep,grooming:renderGroom,antiage:renderAntiAge,growth:renderGrowth,today:renderToday};
+  if(renders[id])renders[id]();
+}
+
+// ═══════════════════ RENDER TODAY ═══════════════════
+function renderToday(){
+  const now=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const el=document.getElementById('todayDateEl');
+  if(el)el.textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  // streak
+  const sr=document.getElementById('streakEl');
+  if(sr){
+    const dn=['S','M','T','W','T','F','S'];sr.innerHTML='';
+    for(let i=6;i>=0;i--){
+      const d=new Date();d.setDate(d.getDate()-i);
+      const k=d.toISOString().split('T')[0];
+      const hit=ST[k]&&(ST[k].water||0)>=5;
+      const isT=i===0;
+      sr.innerHTML+=`<div class="streak-d${hit?' hit':''}${isT?' today':''}">${dn[d.getDay()]}</div>`;
+    }
+  }
+  updateStats();
+  updateNext();
+}
+
+function updateStats(){
+  const d=getDay();
+  const w=d.water||0, s=Object.values(d.supps||{}).filter(Boolean).length;
+  const med=d.med?.sessions||0, task=Object.values(d.sched||{}).filter(Boolean).length;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('sv-water',w);set('sv-supp',s);set('sv-med',med);set('sv-task',task);
+  const setPct=(id,v,max)=>{const e=document.getElementById(id);if(e)e.style.width=Math.min(100,v/max*100)+'%';};
+  setPct('sf-water',w,10);setPct('sf-supp',s,6);setPct('sf-med',med,2);setPct('sf-task',task,SCHEDULE.length);
+  const total=SCHEDULE.length+6+2;const done=task+s+med;
+  const pct=Math.round(done/total*100);
+  const pb=document.getElementById('dpBar');const pp=document.getElementById('pctEl');
+  if(pb)pb.style.width=pct+'%';if(pp)pp.textContent=pct+'%';
+}
+
+function updateNext(){
+  const now=new Date();const cur=now.getHours()*60+now.getMinutes();
+  let next=null;
+  for(const s of SCHEDULE){
+    const [h,m]=s.t.split(':').map(Number);
+    if(h*60+m>cur){next=s;break;}
+  }
+  if(next){
+    const ni=document.getElementById('nextIcon'),nn=document.getElementById('nextName'),nt=document.getElementById('nextTime'),nb=document.getElementById('nextBadge');
+    if(ni)ni.textContent=next.emoji;
+    if(nn)nn.textContent=next.title;
+    if(nt)nt.textContent=next.desc.substring(0,50)+'...';
+    if(nb)nb.textContent=next.t;
+  }
+}
+
+// ═══════════════════ SCHEDULE ═══════════════════
+function renderSchedule(){
+  const now=new Date();const cur=now.getHours()*60+now.getMinutes();
+  const d=getDay();const el=document.getElementById('schedList');if(!el)return;
+  el.innerHTML='';
+  SCHEDULE.forEach((s,i)=>{
+    const [h,m]=s.t.split(':').map(Number);const sm=h*60+m;
+    const isCur=sm<=cur&&sm>cur-30;const done=d.sched&&d.sched[i];
+    const div=document.createElement('div');
+    div.className=`sched-item${done?' done-s':''}${isCur?' current':''}`;
+    div.onclick=()=>toggleSched(i,div);
+    div.innerHTML=`<div class="sched-time">${s.t}</div><div class="sched-body"><div class="sched-title">${s.emoji} ${s.title}</div><div class="sched-desc">${s.desc}</div></div><div class="sched-check">${done?'✓':''}</div>`;
+    el.appendChild(div);
+  });
+}
+function toggleSched(i,el){
+  const d=getDay();if(!d.sched)d.sched={};
+  d.sched[i]=!d.sched[i];el.classList.toggle('done-s');
+  el.querySelector('.sched-check').textContent=d.sched[i]?'✓':'';
+  saveState();updateStats();
+}
+
+// ═══════════════════ WATER ═══════════════════
+function renderWater(){
+  const d=getDay();const w=d.water||0;
+  const ml=w*250;const pct=ml/2500;
+  const offset=364*(1-pct);
+  const wc=document.getElementById('waterCircle');if(wc)wc.style.strokeDashoffset=offset;
+  const wn=document.getElementById('waterNum');if(wn)wn.textContent=w;
+  const wm=document.getElementById('waterMl');if(wm)wm.textContent=`${ml}/2500ml`;
+  const gg=document.getElementById('glassGrid');if(!gg)return;
+  gg.innerHTML='';
+  for(let i=0;i<10;i++){
+    const g=document.createElement('div');g.className=`glass-btn${i<w?' full':''}`;
+    g.innerHTML='💧';g.onclick=()=>{d.water=i<w?i:i+1;saveState();renderWater();updateStats();};
+    gg.appendChild(g);
+  }
+  const wt=document.getElementById('waterTimesEl');
+  if(wt)wt.innerHTML=[
+    {t:"6:08 AM",n:"Warm lemon water — first thing"},
+    {t:"9:45 AM",n:"With green tea"},
+    {t:"12:00 PM",n:"Mid-morning study break"},
+    {t:"12:30 PM",n:"Before first meal"},
+    {t:"3:00 PM",n:"Afternoon energy"},
+    {t:"5:00 PM",n:"Work hours"},
+    {t:"7:00 PM",n:"Before dinner"},
+    {t:"8:30 PM",n:"Post dinner"},
+    {t:"9:00 PM",n:"Last large glass"},
+    {t:"11:00 PM",n:"Small sip if needed"},
+  ].map(w=>`<div class="sched-item" style="margin-bottom:5px"><div class="sched-time">${w.t}</div><div class="sched-body"><div class="sched-title">💧 Water</div><div class="sched-desc">${w.n}</div></div></div>`).join('');
+}
+function addW(){const d=getDay();d.water=Math.min(10,d.water+1);saveState();renderWater();updateStats();}
+function removeW(){const d=getDay();d.water=Math.max(0,d.water-1);saveState();renderWater();updateStats();}
+
+// ═══════════════════ MEALS ═══════════════════
+const DAYS_ORDER=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+let selectedDay=DAYS_ORDER[new Date().getDay()===0?6:new Date().getDay()-1];
+function renderMeals(){
+  const chips=document.getElementById('dayChips');
+  if(chips)chips.innerHTML=DAYS_ORDER.map(d=>`<div class="day-chip${d===selectedDay?' active':''}" onclick="selectDay('${d}')">${d}</div>`).join('');
+  const mc=document.getElementById('mealContent');if(!mc)return;
+  const data=MEALS[selectedDay];
+  mc.innerHTML=data.map(m=>`<div class="meal-card"><div class="meal-time-tag">${m.t} — ${m.label}</div><div class="meal-heading">${m.name}</div><div class="meal-items">${m.items}</div>${m.note?`<div class="meal-note">💡 ${m.note}</div>`:''}</div>`).join('');
+}
+function selectDay(d){selectedDay=d;renderMeals();}
+
+// ═══════════════════ SUPPLEMENTS ═══════════════════
+function renderSupps(){
+  const d=getDay();const el=document.getElementById('suppGrid');if(!el)return;
+  el.innerHTML='';
+  SUPPS.forEach((s,i)=>{
+    const taken=d.supps&&d.supps[i];
+    const div=document.createElement('div');div.className=`supp-card${taken?' taken':''}`;
+    div.onclick=()=>toggleSupp(i,div);
+    div.innerHTML=`<div class="supp-em">${s.em}</div><div class="supp-name">${s.name}</div><div class="supp-benefit">${s.benefit}</div><div class="supp-when">${s.when}</div><div class="supp-status">${taken?'✓ TAKEN TODAY':'Not taken'}</div>`;
+    el.appendChild(div);
+  });
+  updateStats();
+}
+function toggleSupp(i,el){
+  const d=getDay();if(!d.supps)d.supps={};
+  d.supps[i]=!d.supps[i];el.classList.toggle('taken');
+  el.querySelector('.supp-status').textContent=d.supps[i]?'✓ TAKEN TODAY':'Not taken';
+  if(d.supps[i])el.innerHTML+=`<div class="supp-card taken::after"></div>`;
+  saveState();updateStats();
+}
+
+// ═══════════════════ DETOX ═══════════════════
+function renderDetox(){
+  const el=document.getElementById('detoxContent');if(!el)return;
+  el.innerHTML=DETOX.map(d=>`<div class="detox-card"><div class="detox-icon">${d.icon}</div><div><div class="detox-name">${d.name}</div><div class="detox-when">${d.when}</div><div class="detox-recipe">${d.recipe}</div></div></div>`).join('');
+}
+
+// ═══════════════════ EXERCISE ═══════════════════
+function renderEx(){
+  const d=getDay();const el=document.getElementById('exContent');if(!el)return;
+  el.innerHTML='';
+  Object.entries(EXERCISE).forEach(([section,items])=>{
+    el.innerHTML+=`<div class="ex-section-label">${section}</div>`;
+    items.forEach((item,i)=>{
+      const key=`${section}_${i}`;const done=d.ex&&d.ex[key];
+      el.innerHTML+=`<div class="ex-item${done?' done-e':''}" onclick="toggleEx('${key}',this)"><div class="ex-emoji">${item.em}</div><div style="flex:1"><div class="ex-name">${item.name}</div><div class="ex-detail">${item.detail}</div></div><div class="ex-dur">${item.dur}</div></div>`;
+    });
+  });
+}
+function toggleEx(key,el){
+  const d=getDay();if(!d.ex)d.ex={};
+  d.ex[key]=!d.ex[key];el.classList.toggle('done-e');saveState();
+}
+
+// ═══════════════════ STUDY ═══════════════════
+function renderStudy(){
+  const el=document.getElementById('studyContent');if(!el)return;
+  el.innerHTML=STUDY.map(s=>`<div class="study-block"><div class="study-time">${s.t}</div><div class="study-name">${s.name}</div><div class="study-tasks">${s.tasks}</div><div class="study-tip">💡 ${s.tip}</div></div>`).join('');
+}
+
+// ═══════════════════ MEDITATION ═══════════════════
+let medSec=20*60,medRunning=false,medInt=null,medTotal=20*60;
+function renderMed(){
+  updateMedDisplay();
+  const d=getDay();const el=document.getElementById('medSessions');if(!el)return;
+  const sessions=[{name:'🌅 Morning Session',time:'6:35 AM',key:'morning'},{name:'🌙 Evening Session',time:'9:45 PM',key:'evening'}];
+  el.innerHTML=sessions.map(s=>{
+    const done=d.med&&d.med[s.key];
+    return `<div class="med-sess-card${done?' done-m':''}" onclick="toggleMedSess('${s.key}',this)"><div class="med-sess-name">${s.name}</div><div class="med-sess-time">${s.time} · 15–20 min</div><div class="med-sess-done">${done?'✅ Completed':''}</div></div>`;
+  }).join('');
+}
+function toggleMed(){
+  const ring=document.getElementById('medRing');const btn=document.getElementById('medGoBtn');
+  if(!medRunning){
+    medRunning=true;ring.classList.add('active');btn.textContent='⏸ Pause';
+    medInt=setInterval(()=>{
+      medSec--;updateMedDisplay();
+      if(medSec<=0){clearInterval(medInt);medRunning=false;ring.classList.remove('active');btn.textContent='▶ Start Again';
+        fireNotif('🧘 Meditation Complete!','20 minutes of mindfulness complete. Mark your session below.');
+        medSec=medTotal;}
+    },1000);
+  }else{clearInterval(medInt);medRunning=false;ring.classList.remove('active');btn.textContent='▶ Resume';}
+}
+function setMed(m){if(!medRunning){medSec=m*60;medTotal=m*60;updateMedDisplay();}}
+function updateMedDisplay(){
+  const el=document.getElementById('medTimeEl');const sl=document.getElementById('medStatusEl');
+  if(el)el.textContent=`${String(Math.floor(medSec/60)).padStart(2,'0')}:${String(medSec%60).padStart(2,'0')}`;
+  if(sl)sl.textContent=medRunning?'BREATHE...':medSec===medTotal?'TAP TO START':'PAUSED';
+  const circle=document.getElementById('medCircleEl');
+  if(circle){const pct=1-(medSec/medTotal);circle.style.strokeDashoffset=427*(1-pct);}
+}
+function toggleMedSess(key,el){
+  const d=getDay();if(!d.med)d.med={sessions:0};
+  d.med[key]=!d.med[key];el.classList.toggle('done-m');
+  el.querySelector('.med-sess-done').textContent=d.med[key]?'✅ Completed':'';
+  d.med.sessions=['morning','evening'].filter(k=>d.med[k]).length;
+  saveState();updateStats();
+}
+
+// ═══════════════════ SLEEP ═══════════════════
+function renderSleep(){
+  const el=document.getElementById('sleepContent');if(!el)return;
+  el.innerHTML=SLEEP_PLAN.map(s=>`<div class="sleep-item"><div class="sleep-t">${s.t}</div><div><div class="sleep-act">${s.act}</div><div class="sleep-note">${s.note}</div></div></div>`).join('');
+}
+
+// ═══════════════════ GROOMING ═══════════════════
+function renderGroom(){
+  const d=getDay();const el=document.getElementById('groomContent');if(!el)return;
+  el.innerHTML='';
+  Object.entries(GROOMING).forEach(([cat,items])=>{
+    el.innerHTML+=`<div class="groom-label">${cat}</div>`;
+    items.forEach((g,i)=>{
+      const key=`${cat}_${i}`;const done=d.groom&&d.groom[key];
+      el.innerHTML+=`<div class="groom-card${done?' done-g':''}" onclick="toggleGroom('${key}',this)"><div class="groom-em">${g.em}</div><div style="flex:1"><div class="groom-n">${g.name}</div><div class="groom-note">${g.note}</div></div><div class="groom-t">${g.t}</div></div>`;
+    });
+  });
+}
+function toggleGroom(key,el){
+  const d=getDay();if(!d.groom)d.groom={};
+  d.groom[key]=!d.groom[key];el.classList.toggle('done-g');saveState();
+}
+
+// ═══════════════════ ANTI-AGING ═══════════════════
+function renderAntiAge(){
+  const el=document.getElementById('antiageContent');if(!el)return;
+  el.innerHTML=ANTIAGE.map(a=>`<div class="antiage-block"><div class="antiage-cat">${a.cat}</div><div class="antiage-name">${a.name}</div><div class="timeline-badge">⏱ ${a.timeline}</div><div class="antiage-actions" style="margin-top:10px">${a.actions.map(x=>`<div class="antiage-action">${x}</div>`).join('')}</div></div>`).join('');
+}
+
+// ═══════════════════ GROWTH ═══════════════════
+function renderGrowth(){
+  const el=document.getElementById('growthContent');if(!el)return;
+  el.innerHTML=GROWTH.map(g=>`<div class="growth-block"><div class="growth-cat">${g.cat}</div><div class="growth-name">${g.name}</div><div class="growth-list">${g.items.map(x=>`<div class="growth-item-row">${x}</div>`).join('')}</div></div>`).join('');
+}
+
+// ═══════════════════ PWA / INSTALL ═══════════════════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('installBanner').classList.add('show');
+});
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.then(()=>{deferredPrompt=null;document.getElementById('installBanner').classList.remove('show');});}
+}
+
+// ═══════════════════ NOTIFICATIONS PERMISSION ═══════════════════
+if('Notification'in window&&Notification.permission==='default'){
+  setTimeout(()=>Notification.requestPermission(),3000);
+}
+
+// ═══════════════════ INIT ═══════════════════
+getDay();
+renderToday();
+renderWater();
+tick();
+setInterval(tick,10000);
+</script>
+</body>
+</html>
